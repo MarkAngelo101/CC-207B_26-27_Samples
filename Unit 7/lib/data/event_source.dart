@@ -53,12 +53,22 @@ Object? decodeOrThrow(http.Response response, String cms) {
   final code = response.statusCode;
   // EXPLAIN E4: 401, 404 and 500 are all "errors", but who has to fix each
   // one: the user, you (the developer), or the people running the CMS?
-  // TODO 1: Use a switch on code:
-  //   200        -> return jsonDecode(response.body)
-  //   401 or 403 -> throw CmsException('$cms refused the request ($code). Check your token and the read permission.')
-  //   404        -> throw CmsException('$cms could not find the events (404). Check the URL and the content type name.')
-  //   500 and up -> throw CmsException('$cms is having problems ($code). Try again later.')
-  //   anything else -> throw CmsException('$cms answered $code.')
-  // Hint: patterns like `case 401 || 403:` and `case >= 500:` work in Dart 3.
-  return jsonDecode(response.body);
+  switch (code) {
+    case 200:
+      return jsonDecode(response.body);
+    case 401 || 403:
+      throw CmsException(
+        '$cms refused the request ($code). '
+        'Check your token and the read permission.',
+      );
+    case 404:
+      throw CmsException(
+        '$cms could not find the events (404). '
+        'Check the URL and the content type name.',
+      );
+    case >= 500:
+      throw CmsException('$cms is having problems ($code). Try again later.');
+    default:
+      throw CmsException('$cms answered $code.');
+  }
 }

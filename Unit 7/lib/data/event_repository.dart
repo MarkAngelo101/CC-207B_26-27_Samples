@@ -28,10 +28,15 @@ class EventRepository {
     try {
       final events = await source.fetchEvents();
       // TODO 4: Save events in _lastGood, then return EventLoad(events).
+      _lastGood = events;
       return EventLoad(events);
     } catch (error) {
       // TODO 5: If there is a saved copy, return it with savedCopy: true.
       // Only when there is none, let the error through (the code below).
+      final saved = _lastGood;
+      if (saved != null) {
+        return EventLoad(saved, savedCopy: true);
+      }
       if (error is CmsException) rethrow;
       // Usually a field name that does not match your CMS (a null where a
       // String was expected). The message tells you which type was wrong.
